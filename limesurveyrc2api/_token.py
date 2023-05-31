@@ -280,3 +280,92 @@ class _Token(object):
     def remind_participants(self):
         # TODO
         raise NotImplementedError
+
+    def set_participant_properties(
+            self, survey_id,
+            TokenQueryProperties,
+            TokenData,
+        ):
+        """
+        List participants in a survey.
+
+        Parameters
+        :param survey_id: ID of survey to invite participants from.
+        :type survey_id: Integer
+        :param TokenQueryProperties: Array of participant properties used to query the participant, or the token id as an integer
+        :type TokenQueryProperties: Array|Integer
+        :param QuestionData: Data to change
+        :type QuestionData: Array
+        """
+        method = "set_participant_properties"
+        conditions = conditions or []
+        params = OrderedDict([
+            ("sSessionKey", self.api.session_key),
+            ("iSurveyID", survey_id),
+            ("aTokenQueryProperties", TokenQueryProperties),
+            ("aTokenData", TokenData),
+        ])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = [
+                "Error: Invalid survey ID",
+                "Error: No token table",
+                "No survey participants found.",
+                "Invalid session key",
+                "No permission",
+                "Invalid Session Key"
+            ]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is list
+        return response
+
+    def set_question_properties(
+            self, survey_id,
+            QuestionID,
+            QuestionData,
+            Language = None,
+        ):
+        """
+        List participants in a survey.
+
+        Parameters
+        :param survey_id: ID of survey to invite participants from.
+        :type survey_id: Integer
+        :param QuestionID: 
+        :type QuestionID: Integer
+        :param QuestionData: 
+        :type QuestionData: Array
+        """
+        method = "update_response"
+        conditions = conditions or []
+        params = OrderedDict([
+            ("sSessionKey", self.api.session_key),
+            ("iSurveyID", survey_id),
+            ("iQuestionID", QuestionID),
+            ("aQuestionData", QuestionData),
+        ])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = [
+                "Error: Invalid survey ID",
+                "Error: No token table",
+                "No survey participants found.",
+                "Invalid session key",
+                "No permission",
+                "Invalid Session Key"
+            ]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is list
+        return response
