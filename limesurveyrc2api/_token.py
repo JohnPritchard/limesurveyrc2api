@@ -45,6 +45,43 @@ class _Token(object):
             assert response_type is list
         return response
 
+    def add_response(
+            self, survey_id, response_data
+        ) :
+        """
+        Returns the id of the inserted survey response.
+
+        Parameters
+        :param survey_id: ID of survey to delete participants from.
+        :type survey_id: Integer
+        :param participant_data: List of participant detail dictionaries.
+        :type participant_data: List[Dict]
+        :param response_data: The actual response
+        :type response_data: Array
+        """
+        method = "add_response"
+        params = OrderedDict([
+            ("sSessionKey", self.api.session_key),
+            ("iSurveyID", survey_id),
+            ("aResponseData", response_data),
+        ])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = [
+                "Error: Invalid survey ID",
+                "No token table",
+                "No permission"
+            ]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is str
+        return response
+
     def delete_participants(self, survey_id, token_ids):
         """
         Delete participants (by token) from the specified survey.
@@ -139,6 +176,43 @@ class _Token(object):
                     raise LimeSurveyError(method, status)
         else:
             assert response_type is dict
+        return response
+
+    def get_response_ids(self, survey_id,
+                       token):
+        """
+        Return a list of questions from the specified survey.
+
+        Parameters
+        :param survey_id: ID of survey to list questions from.
+        :type survey_id: Integer
+        :param token: 
+        :type token: String
+        """
+        method = "get_response_ids"
+        params = OrderedDict([
+            ("sSessionKey", self.api.session_key),
+            ("iSurveyID", survey_id),
+            ("sToken", token)
+        ])
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = [
+                "Error: Invalid survey ID",
+                "Error: Invalid language",
+                "Error: IMissmatch in surveyid and groupid",
+                "No questions found",
+                "No permission",
+                "Invalid session key"
+            ]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is list
         return response
 
     def get_summary(self, survey_id, stat_name="all"):
@@ -283,27 +357,26 @@ class _Token(object):
 
     def set_participant_properties(
             self, survey_id,
-            TokenQueryProperties,
-            TokenData,
+            token_query_properties,
+            token_data,
         ):
         """
-        List participants in a survey.
+        Allow to set properties about a specific participant, only one particpant can be updated.
 
         Parameters
         :param survey_id: ID of survey to invite participants from.
         :type survey_id: Integer
-        :param TokenQueryProperties: Array of participant properties used to query the participant, or the token id as an integer
-        :type TokenQueryProperties: Array|Integer
-        :param QuestionData: Data to change
-        :type QuestionData: Array
+        :param token_query_properties: List[Dict] of participant properties used to query the participant, or the token id as an integer
+        :type token_query_properties: List[Dict]|Integer
+        :param token_data: Data to change
+        :type token_data: List[Dict]
         """
         method = "set_participant_properties"
-        conditions = conditions or []
         params = OrderedDict([
             ("sSessionKey", self.api.session_key),
             ("iSurveyID", survey_id),
-            ("aTokenQueryProperties", TokenQueryProperties),
-            ("aTokenData", TokenData),
+            ("aTokenQueryProperties", token_query_properties),
+            ("aTokenData", token_data),
         ])
         response = self.api.query(method=method, params=params)
         response_type = type(response)
@@ -313,22 +386,24 @@ class _Token(object):
             error_messages = [
                 "Error: Invalid survey ID",
                 "Error: No token table",
+                "Error: Invalid tokenid",
                 "No survey participants found.",
                 "Invalid session key",
                 "No permission",
-                "Invalid Session Key"
+                "Invalid Session Key",
+                "No valid Data",
             ]
             for message in error_messages:
                 if status == message:
                     raise LimeSurveyError(method, status)
         else:
-            assert response_type is list
+            assert response_type is dict
         return response
 
     def set_question_properties(
             self, survey_id,
-            QuestionID,
-            QuestionData,
+            question_id,
+            question_data,
             Language = None,
         ):
         """
@@ -337,18 +412,17 @@ class _Token(object):
         Parameters
         :param survey_id: ID of survey to invite participants from.
         :type survey_id: Integer
-        :param QuestionID: 
-        :type QuestionID: Integer
-        :param QuestionData: 
-        :type QuestionData: Array
+        :param question_id: 
+        :type question_id: Integer
+        :param question_data: 
+        :type question_data: List[Dict]
         """
         method = "update_response"
-        conditions = conditions or []
         params = OrderedDict([
             ("sSessionKey", self.api.session_key),
             ("iSurveyID", survey_id),
-            ("iQuestionID", QuestionID),
-            ("aQuestionData", QuestionData),
+            ("iQuestionID", question_id),
+            ("aQuestionData", question_data),
         ])
         response = self.api.query(method=method, params=params)
         response_type = type(response)
