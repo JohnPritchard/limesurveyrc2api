@@ -116,6 +116,135 @@ class _Token(object):
             assert response_type is dict
         return response
 
+    def export_responses(
+            self, survey_id,
+            DocumentType,
+            LanguageCode,
+			CompletionStatus=None,
+            HeadingType=None,
+            ResponseType=None,
+            FromResponseID=None,
+            ToResponseID=None,
+            Fields=None,
+        ):
+        """
+        Export token response in a survey.
+        Returns the requested file as base64 encoded string
+
+        Parameters
+        :param survey_id: ID of survey to delete participants from.
+        :type survey_id: Integer
+        :param token: List of token IDs for participants to delete.
+        :type token: Integer
+        :param sDocumentType
+        :param sToken
+        :param sLanguageCode
+		:param sCompletionStatus=None
+        :param sHeadingType=None
+        :param sResponseType=None
+        :param aFields=None
+        """
+        method = "export_responses"
+        params = OrderedDict([
+            ("sSessionKey", self.api.session_key),
+            ("iSurveyID", survey_id),
+            ("sDocumentType", DocumentType),
+            ("sLanguageCode", LanguageCode),
+            ("sCompletionStatus", CompletionStatus),
+            ("sHeadingType", HeadingType),
+            ("sResponseType", ResponseType),
+            ("iFromResponseID", FromResponseID),
+            ("iToResponseID", ToResponseID),
+            ("aFields", Fields),
+        ])
+        '''
+            ("sCompletionStatus", CompletionStatus or 'all'),
+            ("sHeadingType", HeadingType or 'code'),
+            ("sResponseType", ResponseType or 'short'),
+            ("iFromResponseID", FromResponseID),
+            ("iToResponseID",ToResponseID),
+            ("aFields", Fields or []),
+        '''
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = [
+                "Error: Invalid survey ID",
+                "Error: No token table",
+                "No permission",
+                "Invalid Session Key",
+                "No Response found for Token",
+                "Language code not found for this survey.",
+            ]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is str
+        return response
+
+    def export_responses_by_token(
+            self, survey_id, token,
+            DocumentType,
+            LanguageCode,
+			CompletionStatus=None,
+            HeadingType=None,
+            ResponseType=None,
+            Fields=None,
+        ):
+        """
+        Export token response in a survey.
+        Returns the requested file as base64 encoded string
+
+        Parameters
+        :param survey_id: ID of survey to delete participants from.
+        :type survey_id: Integer
+        :param token: List of token IDs for participants to delete.
+        :type token: Integer
+        :param sDocumentType
+        :param sToken
+        :param sLanguageCode
+		:param sCompletionStatus=None
+        :param sHeadingType=None
+        :param sResponseType=None
+        :param aFields=None
+        """
+        method = "export_responses_by_token"
+        params = OrderedDict([
+            ("sSessionKey", self.api.session_key),
+            ("iSurveyID", survey_id),
+            ("sToken", token),
+            ("sDocumentType", DocumentType),
+            ("sLanguageCode", LanguageCode),
+            ("sCompletionStatus", CompletionStatus or 'all'),
+            ("sHeadingType", HeadingType or 'code'),
+            ("sResponseType", ResponseType or 'short'),
+            ("aFields", Fields or []),
+        ])
+        '''
+        '''
+        response = self.api.query(method=method, params=params)
+        response_type = type(response)
+
+        if response_type is dict and "status" in response:
+            status = response["status"]
+            error_messages = [
+                "Error: Invalid survey ID",
+                "Error: No token table",
+                "No permission",
+                "Invalid Session Key",
+                "No Response found for Token",
+                "Language code not found for this survey.",
+            ]
+            for message in error_messages:
+                if status == message:
+                    raise LimeSurveyError(method, status)
+        else:
+            assert response_type is str
+        return response
+
     def get_participant_properties(
             self, survey_id, token_id, token_query_properties=None,
             token_properties=None):
