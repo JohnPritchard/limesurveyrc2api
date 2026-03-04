@@ -310,7 +310,7 @@ class _Token(object):
     def get_response_ids(self, survey_id,
                        token):
         """
-        Return a list of questions from the specified survey.
+        Find response IDs given a survey ID and a token (RPC function).
 
         Parameters
         :param survey_id: ID of survey to list questions from.
