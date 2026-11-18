@@ -15,7 +15,7 @@ setup(
     include_package_data=True,
     license="MIT",
     install_requires=[
-        "requests==2.28.2",
+        "requests",
     ],
     keywords="limesurvey api webservice client",
     classifiers=[
